@@ -22,6 +22,10 @@ type Profiler struct {
 	MemProfileFile *os.File
 } // end Profiler struct
 
+func NewProf() *Profiler {
+	return &Profiler{}
+}
+
 func (p *Profiler) PprofWeb(addr string) {
 	router := mux.NewRouter()
 	router.Handle("/debug/pprof/", http.HandlerFunc(hpprof.Index))
