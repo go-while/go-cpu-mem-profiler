@@ -15,15 +15,20 @@ import (
 )
 
 type Profiler struct {
+	mux sync.Mutex
+	mem sync.Mutex
+	cpu sync.Mutex
 	CPUProfile bool // set before boot
 	MEMProfile bool // set before boot
-	mux sync.Mutex
 	CpuProfileFile *os.File
 	MemProfileFile *os.File
 } // end Profiler struct
 
 func NewProf() *Profiler {
-	return &Profiler{}
+	return &Profiler{
+		CPUProfile: true,
+		MEMProfile: true,
+	}
 }
 
 func (p *Profiler) PprofWeb(addr string) {
@@ -47,6 +52,9 @@ func (p *Profiler) PprofWeb(addr string) {
 } // end func PprofWeb
 
 func (p *Profiler) StartCPUProfile() (*os.File, error) {
+	if !p.CPUProfile {
+		return nil, fmt.Errorf("ERROR !p.CPUProfile")
+	}
 	if p.CpuProfileFile != nil {
 		return nil, fmt.Errorf("ERROR StartCPUProfile p.CpuProfileFile != nil")
 	}
@@ -77,25 +85,32 @@ func (p *Profiler) StopCPUProfile() {
 } // end StopCPUProfile
 
 
-func (p *Profiler) MemoryProfile(duration time.Duration, wait time.Duration, pprofmem bool) error {
-	if !pprofmem {
-		return nil
+func (p *Profiler) MemoryProfile(duration time.Duration, wait time.Duration) error {
+	p.mem.Lock()
+	defer p.mem.Lock()
+	if !p.MEMProfile {
+		return fmt.Errorf("ERROR !p.MEMProfile")
+	}
+	if p.MemProfileFile != nil {
+		return fmt.Errorf("ERROR MemoryProfile p.MemProfileFile != nil")
 	}
 	// Generate a unique filename with a timestamp
 	fn := fmt.Sprintf("mem.pprof.%d.out", time.Now().Unix())
 	time.Sleep(wait)
-	log.Printf("capture MemoryProfile duration=%#v waited=%#v", duration, wait)
+	log.Printf("capture MemoryProfile duration=%#v waited=%#v fn='%s'", duration, wait, fn)
 	// Create the profile file
 	f, err := os.Create(fn)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 	p.MemProfileFile = f
 	// Start memory profiling
 	pprof.Lookup("heap").WriteTo(f, 0)
 	// Sleep for the specified duration to capture the memory profile
 	time.Sleep(duration)
+	f.Close()
+	p.MemProfileFile = nil
+	log.Printf("close MemoryProfile duration=%#v waited=%#v fn='%s'", duration, wait, fn)
 	return nil
 } // end func MemoryProfile
 
