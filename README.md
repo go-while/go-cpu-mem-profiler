@@ -29,7 +29,7 @@ func main() {
 
 	// starts a memory profiler for runtime
 	// use waittime to delay the start
-	Prof.MemProfile(runtime, waittime, true)
+	Prof.StartMemProfile(runtime, waittime)
 }
 ```
 
