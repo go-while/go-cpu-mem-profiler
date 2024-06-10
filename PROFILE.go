@@ -32,6 +32,8 @@ func NewProf() *Profiler {
 }
 
 func (p *Profiler) PprofWeb(addr string) {
+	p.mux.Lock()
+	defer p.mux.Unlock()
 	router := mux.NewRouter()
 	router.Handle("/debug/pprof/", http.HandlerFunc(hpprof.Index))
 	router.Handle("/debug/pprof/cmdline", http.HandlerFunc(hpprof.Cmdline))
@@ -46,12 +48,13 @@ func (p *Profiler) PprofWeb(addr string) {
 		if err := server.ListenAndServe(); err != nil {
 			// handle err
 			log.Printf("debug_pprof ERROR server.ListenAndServe err='%v'", err)
-			os.Exit(1)
 		}
 	}()
 } // end func PprofWeb
 
 func (p *Profiler) StartCPUProfile() (*os.File, error) {
+	p.cpu.Lock()
+	defer p.cpu.Unlock()
 	if !p.CPUProfile {
 		return nil, fmt.Errorf("ERROR !p.CPUProfile")
 	}
@@ -74,6 +77,8 @@ func (p *Profiler) StartCPUProfile() (*os.File, error) {
 } // end func startCPUProfile
 
 func (p *Profiler) StopCPUProfile() {
+	p.cpu.Lock()
+	defer p.cpu.Unlock()
 	if p.CpuProfileFile == nil {
 		log.Printf("ERROR stopCPUProfile cpuProfileFile=nil")
 		return
@@ -85,23 +90,42 @@ func (p *Profiler) StopCPUProfile() {
 } // end StopCPUProfile
 
 
-func (p *Profiler) MemoryProfile(duration time.Duration, wait time.Duration) error {
+
+func (p *Profiler) StartMemoryProfile(duration time.Duration, wait time.Duration) error {
 	p.mem.Lock()
-	defer p.mem.Lock()
+	defer p.mem.Unlock()
 	if !p.MEMProfile {
+		log.Printf("ERROR StartMemoryProfile !p.MEMProfile")
 		return fmt.Errorf("ERROR !p.MEMProfile")
 	}
 	if p.MemProfileFile != nil {
-		return fmt.Errorf("ERROR MemoryProfile p.MemProfileFile != nil")
+		log.Printf("ERROR StartMemoryProfile p.MemProfileFile != nil")
+		return fmt.Errorf("ERROR p.MemProfileFile != nil")
+	}
+	go p.memoryProfiler(duration, wait)
+	return nil
+}
+
+func (p *Profiler) memoryProfiler(duration time.Duration, wait time.Duration) {
+	p.mem.Lock()
+	defer p.mem.Unlock()
+	if !p.MEMProfile {
+		log.Printf("ERROR memoryProfiler !p.MEMProfile")
+		return
+	}
+	if p.MemProfileFile != nil {
+		log.Printf("ERROR memoryProfiler p.MemProfileFile != nil")
+		return
 	}
 	// Generate a unique filename with a timestamp
 	fn := fmt.Sprintf("mem.pprof.%d.out", time.Now().Unix())
 	time.Sleep(wait)
-	log.Printf("capture MemoryProfile duration=%#v waited=%#v fn='%s'", duration, wait, fn)
+	log.Printf("capture MemoryProfile duration=(%#v ns) waited=(%#v ns) fn='%s'", duration, wait, fn)
 	// Create the profile file
 	f, err := os.Create(fn)
 	if err != nil {
-		return err
+		log.Printf("ERROR memoryProfiler os.Create(fn='%s') err='%v'", fn, err)
+		return
 	}
 	p.MemProfileFile = f
 	// Start memory profiling
@@ -110,8 +134,8 @@ func (p *Profiler) MemoryProfile(duration time.Duration, wait time.Duration) err
 	time.Sleep(duration)
 	f.Close()
 	p.MemProfileFile = nil
-	log.Printf("close MemoryProfile duration=%#v waited=%#v fn='%s'", duration, wait, fn)
-	return nil
+	log.Printf("close MemoryProfile duration=(%#v ns) waited=(%#v ns) fn='%s'", duration, wait, fn)
+	return
 } // end func MemoryProfile
 
 func (p *Profiler) CatchInterruptSignal(cpu bool, mem bool) {
