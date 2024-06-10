@@ -40,10 +40,15 @@ Contributions to this code are welcome.
 
 If you have suggestions for improvements or find issues, please feel free to open an issue or submit a pull request.
 
+
 ## License
 
 This code is provided under the MIT License. See the [LICENSE](LICENSE) file for details.
 
+
+## Footer
 <p align="center">
-  <img width="110" src="https://github-profile-trophy.vercel.app/?username=go-while&theme=matrix">
+  <h2 align="center"><a href="https://github.com/ryo-ma/github-profile-trophy>GitHub Profile Trophy</a></h2>
+  <p align="center">🏆 Add dynamically generated GitHub Stat Trophies on your readme</p>
+  <img width="1280" src="https://github-profile-trophy.vercel.app/?username=go-while&theme=matrix">
 </p>
