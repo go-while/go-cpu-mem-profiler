@@ -91,7 +91,7 @@ func (p *Profiler) StopCPUProfile() {
 
 
 
-func (p *Profiler) StartMemoryProfile(duration time.Duration, wait time.Duration) error {
+func (p *Profiler) StartMemProfile(duration time.Duration, wait time.Duration) error {
 	p.mem.Lock()
 	defer p.mem.Unlock()
 	if !p.MEMProfile {
@@ -104,7 +104,7 @@ func (p *Profiler) StartMemoryProfile(duration time.Duration, wait time.Duration
 	}
 	go p.memoryProfiler(duration, wait)
 	return nil
-}
+} // end func StartMemProfile
 
 func (p *Profiler) memoryProfiler(duration time.Duration, wait time.Duration) {
 	p.mem.Lock()
