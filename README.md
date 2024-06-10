@@ -43,3 +43,7 @@ If you have suggestions for improvements or find issues, please feel free to ope
 ## License
 
 This code is provided under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+<p align="center">
+  <img width="110" src="https://github-profile-trophy.vercel.app/?username=go-while&theme=matrix">
+</p>
