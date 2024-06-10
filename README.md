@@ -48,7 +48,7 @@ This code is provided under the MIT License. See the [LICENSE](LICENSE) file for
 
 ## Footer
 <p align="center">
-  <h2 align="center"><a href="https://github.com/ryo-ma/github-profile-trophy>GitHub Profile Trophy</a></h2>
+  <h2 align="center"><a href="https://github.com/ryo-ma/github-profile-trophy">GitHub Profile Trophy</a></h2>
   <p align="center">🏆 Add dynamically generated GitHub Stat Trophies on your readme</p>
   <img width="1280" src="https://github-profile-trophy.vercel.app/?username=go-while&theme=matrix">
 </p>
