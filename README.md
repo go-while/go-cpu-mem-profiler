@@ -2,7 +2,7 @@
  a hopefully simple to use cpu and mem profiler for GOlang
 
 
-[code]
+```go
 import (
 	"github.com/go-while/go-cpu-mem-profiler"
 )
@@ -31,7 +31,7 @@ func main() {
 	// use waittime to delay the start
 	Prof.MemProfile(runtime, waittime, true)
 }
-[/code]
+```
 
 
 ## Contributing
